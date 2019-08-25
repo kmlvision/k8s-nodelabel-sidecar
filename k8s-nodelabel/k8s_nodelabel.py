@@ -25,7 +25,7 @@ def main():
     target_env_file = os.environ.get('ENV_FILE', 'k8s_nodelabel_envs')
     with open(target_env_file, 'w') as fout:
         for label_env in node_label_envs.items():
-            fout.write('%s=%s\n' % (label_env[0], label_env[1]))
+            fout.write('export %s=%s\n' % (label_env[0], label_env[1]))
 
 
 if __name__ == "__main__":

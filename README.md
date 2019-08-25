@@ -8,7 +8,7 @@ To configure the k8s-nodelabel-sidecar image, you can set the following env-vari
 * `NODE_NAME`: the name of the node of which the labels should be read (will most often be set to a downWardApi `spec.nodeName` in the container config, to refer to the actual node where the pod is scheduled)
 * `NODE_LABELS`: a comma-separated list of labels that should be read from the node specified with `NODE_NAME`
 * `ENV_NAMES`: a comma-separated list of env-variable names that are used to store the values of the labels specified with `NODE_LABELS` (must be the same number as node labels are specified)
-* `ENV_FILE`: the path to write the .env file containint the label values mapped to the env names
+* `ENV_FILE`: the file to write the env variables as `EXPORT NAME=VALUE` to be later used with `source`
 * `KUBECTL_CONFIG`: optional, points to a valid kubectl config file to access the cluster (only needed if you use this from outside a k8s-cluster). If not set, the default in-cluster config will be used (should be sufficient if you intend to run this image from within a k8s-cluster)
 
 ```.env
