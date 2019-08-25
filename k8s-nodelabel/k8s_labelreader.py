@@ -19,9 +19,14 @@ class K8SLabelReader(object):
         :param env_names: the desired env names (needs to be of the same size as node_labels)
         """
 
-        self.kubectl_config = kubectl_config
-        assert self.kubectl_config not in (None, '') and os.path.exists(os.path.abspath(self.kubectl_config)), \
-            "kubernetes config file does not exist in '{}'".format(self.kubectl_config)
+        if kubectl_config is None:
+            self.in_cluster_config = True
+        else:
+            self.in_cluster_config = False
+            self.kubectl_config = kubectl_config
+            assert self.kubectl_config not in (None, '') and os.path.exists(
+                os.path.abspath(self.kubectl_config)), "kubernetes config file does not exist in '{}'".format(
+                self.kubectl_config)
 
         self.node_name = node_name
         assert self.node_name not in (None, ''), "node_name must not be null or empty"
@@ -35,8 +40,10 @@ class K8SLabelReader(object):
             self.node_labels), "env_labels must be specified and be of same size as node_labels"
 
     def read_labels(self):
-        # Configs can be set in Configuration class directly or using helper utility
-        config.load_kube_config(config_file=self.kubectl_config)
+        if self.in_cluster_config:
+            config.load_incluster_config()
+        else:
+            config.load_kube_config(config_file=self.kubectl_config)
 
         v1 = client.CoreV1Api()
         log.info("listing node labels for node: {}".format(self.node_name))

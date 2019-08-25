@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def configure():
-    kubectl_config = os.environ.get('KUBECTL_CONFIG', 'kubectl_config')
+    kubectl_config = os.environ.get('KUBECTL_CONFIG')
     node_name = os.environ.get('NODE_NAME')
     node_labels = os.environ.get('NODE_LABELS', '').split(',')
     env_names = os.environ.get('ENV_NAMES', '').split(',')
