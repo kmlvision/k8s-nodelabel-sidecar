@@ -18,3 +18,48 @@ NODE_LABELS=kubernetes.io/hostname,kubernetes.io/os
 ENV_NAMES=HOSTNAME,HOST_OS
 ENV_FILE=/node-labels.env
 ```
+
+## HTTP respopnse 403 Forbidden when accessing node info
+depending on the envrionment in which k8s-nodelabel-sidecar is running, you may encounter the following response
+```json
+ {
+  "kind": "Status",
+  "apiVersion": "v1",
+  "metadata": {},
+  "status": "Failure",
+  "message": "nodes is forbidden: User \"system:serviceaccount:myNamespace:default\" cannot list resource \"nodes\" in API group \"\" at the cluster scope",
+  "reason": "Forbidden",
+  "details": {
+    "kind": "nodes"
+  },
+  "code": 403
+}
+``` 
+
+Most probably this occurs when you use the in-cluster config and the default service-account does not have sufficient privileges to access the `nodes` and `nodes/status` resources.
+In that case you could add a `ClusterRole` and `ClusterRoleBinding` to your cluster to add those privileges for the affected service account:
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: node-info
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/status"]
+    verbs: ["get", "list"]
+---
+# bind the default service-account to the node-info clusterrole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-node-info-default
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: myNamespace
+roleRef:
+  kind: ClusterRole
+  name: node-info
+  apiGroup: rbac.authorization.k8s.io
+```
